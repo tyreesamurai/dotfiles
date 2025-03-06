@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json
+version: 2
+blocks:
+  - type: prompt
+    alignment: left
+    segments:
+      - type: os
+        style: diamond
+        leading_diamond: "\u250f"
+        trailing_diamond: 
+      - type: shell
+        style: powerline
+        powerline_symbol: 
+        foreground: "#F5C518"
+        background: "#3D1E1E"
+      - type: path
+        style: powerline
+        powerline_symbol: 
+        foreground: "#0C1E0F"
+        background: "#F9A602"
+        properties:
+          folder_separator_icon: " "
+          folder_icon: "󰷏 "
+          home_icon: " "
+      - type: git
+        style: powerline
+        powerline_symbol: 
+        foreground: "#E07A5F"
+        background: "#3D3A1A"
+      - type: time
+        style: powerline
+        powerline_symbol: 
+        foreground: "#FFFFFF"
+        background: "#D17A22"
+      - type: sysinfo
+        style: diamond
+        trailing_diamond: "\uE0B4"
+        foreground: "#1A3A3A"
+        background: "#F77F00"
+      - type: nba
+        background: "#ffc72c"
+        foreground: "#1d428a"
+        style: diamond
+        leading_diamond: "\uE0B6"
+        trailing_diamond: "\uE0B4"
+        properties:
+          team: GSW
+          http_timeout: 1500
+  - type: prompt
+    alignment: right
+    segments:
+      - type: spotify
+        style: plain
+        foreground: "#1ED760"
+        background: transparent
+      - type: battery
+        style: plain
+        foreground: "#FFFFFF"
+        background: transparent
+  - type: prompt
+    alignment: left
+    newline: true
+    segments:
+      - type: status
+        style: plain
+        properties:
+          always_enabled: true
+        foreground: "#00FF00"
+        foreground_templates:
+          - "{{ if gt .Code 0 }}#FFOOOO{{ end }}"
+        template: "\u2516</> </>"
+      - type: text
+        style: plain

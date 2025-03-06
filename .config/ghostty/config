@@ -1,0 +1,7 @@
+background-opacity = 0.8
+background-blur-radius = 20
+window-theme = ghostty
+theme = "gruvbox-material"
+
+font-family = "Mononoki Nerd Font"
+font-size = 16

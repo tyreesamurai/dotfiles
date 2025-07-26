@@ -3,7 +3,7 @@ return {
     "nvim-neo-tree/neo-tree.nvim",
     opts = {
       window = {
-        -- Other settings if needed
+        position = "right",
       },
       default_component_configs = {
         indent = {
@@ -11,12 +11,5 @@ return {
         },
       },
     },
-    config = function()
-      vim.cmd([[
-        hi NeoTreeNormal guibg=NONE ctermbg=NONE
-        hi NeoTreeNormalNC guibg=NONE ctermbg=NONE
-        hi NeoTreeEndOfBuffer guibg=NONE ctermbg=NONE
-      ]])
-    end,
   },
 }

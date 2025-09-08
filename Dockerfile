@@ -83,13 +83,12 @@ set -euo pipefail
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/nvim"
 MARKER="$STATE_DIR/.nvim_bootstrapped"
 
-if [[ "${VIM_SKIP_BOOTSTRAP:-0}"!= "1" && ! -f "$MARKER" ]]; then
+if [[ "${VIM_SKIP_BOOTSTRAP:-0}" != "1" && ! -f "$MARKER" ]]; then
   echo "[vim] First-time setup: installing Neovim plugins/parsers/tools..."
   nvim --headless "+Lazy! install" "+qall" || true
   nvim --headless "+TSUpdateSync" "+qall" || true
   nvim --headless "+MasonToolsInstallSync" "+qall" || true
-  mkdir -p "$STATE_DIR"
-  touch "$MARKER"
+  mkdir -p "$STATE_DIR"; touch "$MARKER"
   echo "[vim] Neovim setup complete."
 fi
 

@@ -1,6 +1,5 @@
-
 # ---------- Base ----------
-FROM docker.io/debian:bookworm
+FROM debian:bookworm-slim
 
 # Non-interactive APT everywhere
 ENV DEBIAN_FRONTEND=noninteractive
@@ -12,7 +11,7 @@ ENV LC_ALL="en_US.UTF-8"
 # ---------- Core packages ----------
 # Note: fd-find provides 'fdfind' binary; we'll symlink 'fd' below.
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-  curl git zsh tmux ripgrep fd-find fzf stow bat build-essential pkg-config ca-certificates ncurses-term locales unzip \
+  curl git zsh tmux ripgrep fd-find fzf stow bat build-essential ca-certificates ncurses-term locales unzip \
   && apt-get clean \
   && sed -i 's/^# *\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
   && locale-gen \
@@ -77,10 +76,35 @@ RUN git clone --depth=1 https://github.com/tmux-plugins/tpm /root/.config/tmux/p
   && tmux kill-server || true
 
 # ---------- Neovim headless bootstraps (best-effort) ----------
-# If your config expects external runtimes (node/go/python), consider adding them, or ignore failures.
-RUN nvim --headless "+Lazy! install" "+qall" || true \
-  && nvim --headless "+TSUpdateSync" "+qall" || true \
-  && nvim --headless "+MasonToolsInstallSync" "+qall" || true
+RUN cat >/usr/local/bin/vim <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/nvim"
+MARKER="$STATE_DIR/.nvim_bootstrapped"
+
+if [[ "${VIM_SKIP_BOOTSTRAP:-0}"!= "1" && ! -f "$MARKER" ]]; then
+  echo "[vim] First-time setup: installing Neovim plugins/parsers/tools..."
+  nvim --headless "+Lazy! install" "+qall" || true
+  nvim --headless "+TSUpdateSync" "+qall" || true
+  nvim --headless "+MasonToolsInstallSync" "+qall" || true
+  mkdir -p "$STATE_DIR"
+  touch "$MARKER"
+  echo "[vim] Neovim setup complete."
+fi
+
+exec /usr/local/bin/nvim "$@"
+EOF
+
+# RUN nvim --headless "+Lazy! install" "+qall" || true \
+#   && nvim --headless "+TSUpdateSync" "+qall" || true \
+#   && nvim --headless "+MasonToolsInstallSync" "+qall" || true
+
+RUN echo 'unalias vim' >> /root/dotfiles/zsh/.config/zsh/zshrc \
+  && sed -i 's/\r$//' /usr/local/bin/vim \
+  && chmod +x /usr/local/bin/vim \
+  && update-alternatives --install /usr/bin/vim vim /usr/local/bin/vim 70 \
+  && update-alternatives --set vim /usr/local/bin/vim
 
 # ---------- Default ----------
 ENTRYPOINT [ "/usr/bin/zsh" ]

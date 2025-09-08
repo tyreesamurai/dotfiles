@@ -3,10 +3,12 @@ FROM debian:bookworm-slim
 
 # Non-interactive APT everywhere
 ENV DEBIAN_FRONTEND=noninteractive
-ENV user=root
+ENV USER=root
+ENV HOME="/root"
 ENV TERM="xterm-256color"
 ENV LANG="en_US.UTF-8"
 ENV LC_ALL="en_US.UTF-8"
+WORKDIR /root
 
 # ---------- Core packages ----------
 # Note: fd-find provides 'fdfind' binary; we'll symlink 'fd' below.

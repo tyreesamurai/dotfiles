@@ -88,6 +88,7 @@ RUN git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh /root/.config/oh-my-z
   && curl -s https://ohmyposh.dev/install.sh | bash -s -- -d /usr/local/bin \
   # dotfiles
   && git clone --depth=1 --branch "${DOTFILES_BRANCH}" "${DOTFILES_REPO}" /root/dotfiles \
+  && git config --global init.defaultBranch main \
   && cd /root/dotfiles \
   && stow -v nvim \
   && stow -v zsh \

@@ -13,11 +13,36 @@ WORKDIR /root
 # ---------- Core packages ----------
 # Note: fd-find provides 'fdfind' binary; we'll symlink 'fd' below.
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-  curl git zsh tmux ripgrep fd-find fzf stow bat build-essential ca-certificates ncurses-term locales unzip \
+  curl git zsh tmux ripgrep fd-find fzf stow bat gpg build-essential ca-certificates ncurses-term locales unzip \
   && apt-get clean \
   && sed -i 's/^# *\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
   && locale-gen \
   && rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+  # 1) Update + base packages (includes tools we need to add a repo)
+  apt-get update; \
+  apt-get install -y --no-install-recommends \
+  curl git zsh tmux ripgrep fd-find fzf stow bat gpg \
+  build-essential ca-certificates ncurses-term locales unzip; \
+  \
+  # 2) Add eza repo key & list
+  install -d -m 0755 /usr/share/keyrings; \
+  curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc \
+  | gpg --dearmor -o /usr/share/keyrings/eza-archive-keyring.gpg; \
+  echo 'deb [signed-by=/usr/share/keyrings/eza-archive-keyring.gpg] http://deb.gierens.de stable main' \
+  > /etc/apt/sources.list.d/eza.list; \
+  chmod 0644 /usr/share/keyrings/eza-archive-keyring.gpg /etc/apt/sources.list.d/eza.list; \
+  \
+  # 3) Update again (now that the new repo exists) and install eza
+  apt-get update; \
+  apt-get install -y --no-install-recommends eza; \
+  \
+  # 4) Locale & cleanup
+  sed -i 's/^# *\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen; \
+  locale-gen; \
+  apt-get clean; \
+  rm -rf /var/lib/apt/lists/*
 
 # --- Neovim v0.11.3 (fixed paths) ---
 ARG NEOVIM_VERSION=0.11.3

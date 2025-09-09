@@ -7,9 +7,16 @@ source $ZSH/oh-my-zsh.sh
 
 eval "$(oh-my-posh init zsh --config $HOME/.config/oh-my-posh/themes/spaceship.omp.json)"
 
+alias tryhackme="docker run --name try-hack-me -it --rm \
+  --hostname dev \
+  --cap-add=NET_ADMIN \
+  --device /dev/net/tun \
+  -v ~/Desktop/studies/personal/pentesting/openvpn:/temp/openvpn \
+  try-hack-me:latest"
+
 alias vim="nvim"
-# alias ls="eza --icons --group-directories-first"
-# alias ll="eza --icons -l --group-directories-first"
+alias ls="eza --icons --group-directories-first"
+alias ll="eza --icons -l --group-directories-first"
 
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"
 export PATH="$HOME/bin:$PATH"

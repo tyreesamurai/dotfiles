@@ -13,7 +13,7 @@ WORKDIR /root
 # ---------- Core packages ----------
 # Note: fd-find provides 'fdfind' binary; we'll symlink 'fd' below.
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-  curl git zsh tmux ripgrep fd-find fzf stow bat gpg build-essential ca-certificates ncurses-term locales unzip \
+  curl ssh git zsh tmux ripgrep fd-find fzf stow bat gpg build-essential ca-certificates ncurses-term locales unzip \
   && apt-get clean \
   && sed -i 's/^# *\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
   && locale-gen \

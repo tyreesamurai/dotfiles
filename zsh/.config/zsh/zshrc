@@ -18,7 +18,7 @@ alias vim="nvim"
 alias ls="eza --icons --group-directories-first"
 alias ll="eza --icons -l --group-directories-first"
 
-export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin"
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
 export PATH="$HOME/bin:$PATH"
 export PATH="/opt/homebrew/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"

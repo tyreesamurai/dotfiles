@@ -5,9 +5,13 @@ vim.keymap.set("n", "<leader>fs", ":Telescope find_files<cr>")
 -- Add any additional keymaps here
 --
 -- convert note to template and remove leading white space
-vim.keymap.set("n", "<leader>on", ":ObsidianTemplate note<cr> :lua vim.cmd([[1,/^\\S/s/^\\n\\{1,}//]])<cr>")
+vim.keymap.set("n", "<leader>on", function()
+  require("user.on_note").new_note()
+end, { desc = "Create new note" })
 
-vim.keymap.set("n", "<leader>odn", ":ObsidianTemplate daily<cr> :lua vim.cmd([[1,/^\\S/s/^\\n\\{1,}//]])<cr>")
+vim.keymap.set("n", "<leader>odn", function()
+  require("user.on_note").daily_note()
+end, { desc = "Create daily note" })
 
 -- strip date from note title and replace dashes with spaces
 -- must have cursor on title

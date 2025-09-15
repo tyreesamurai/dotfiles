@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# odn — open today's Daily Note with your template + LuaSnip cursor placement
+
+set -euo pipefail
+
+# --- config: adjust Desktop/desktop casing to match your system ---
+ROOT="$HOME/Desktop/studies/zettelkasten"
+TEMPLATE="$ROOT/templates/daily.md"
+
+# Today as YYYY-MM-DD (used for filename and {{title}})
+TITLE="$(date +%Y-%m-%d)"
+DAILY_DIR="$ROOT/inbox"
+FILE="$DAILY_DIR/${TITLE}.md"
+
+cd "$ROOT" || exit 1
+# Ensure directory exists; create file if missing (won't overwrite existing)
+mkdir -p "$DAILY_DIR"
+if [[ ! -f "$FILE" ]]; then
+  : >"$FILE"
+fi
+
+# Hand off to Neovim:
+# - NVIM_NOTE_TITLE becomes {{title}} in your template (e.g., 2025-09-11)
+# - NVIM_NOTE_TEMPLATE points to the editable daily.md file
+NVIM_NOTE_TITLE="$TITLE" \
+  NVIM_NOTE_TEMPLATE="$TEMPLATE" \
+  nvim "$FILE" +'lua require("user.on_note").new_daily()'

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ $# -lt 1 ]; then
+  echo "Error: A note title is required"
+  exit 1
+fi
+
+TITLE="$*"
+SLUG="$(echo "$TITLE" | tr ' ' '-')"
+ROOT="$HOME/desktop/studies/zettelkasten"
+FILE="$ROOT/inbox/${SLUG}.md"
+
+cd "$ROOT" || exit 1
+
+mkdir -p "$ROOT/inbox"
+: >"$FILE"
+
+# Pass the pretty title to nvim and expand the snippet on open
+NVIM_NOTE_TITLE="$TITLE" nvim "$FILE" +'lua require("user.on_note").new_note()'

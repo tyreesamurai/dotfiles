@@ -93,6 +93,7 @@ RUN git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh /root/.config/oh-my-z
   && stow -v nvim \
   && stow -v zsh \
   && stow -v tmux \
+  && stow -v bin \
   && stow -v oh-my-posh || true
 
 # ---------- Tmux plugins (best-effort non-interactive install) ----------

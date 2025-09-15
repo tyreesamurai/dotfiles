@@ -1,0 +1,58 @@
+#!/bin/zsh
+
+# Directory containing markdown files
+VAULT_DIR="$HOME/desktop/studies/zettelkasten"
+SOURCE_DIR="zettelkasten"
+DEST_DIR="notes"
+TAGS_DIR="$VAULT_DIR/tags"
+
+# Ensure the tags directory exists
+mkdir -p "$TAGS_DIR"
+
+# Iterate through all markdown files in the source directory
+find "$VAULT_DIR/$SOURCE_DIR" -type f -name "*.md" | while read -r file; do
+  echo "Processing $file"
+
+  # Extract the folder from the file
+  folder=$(awk '/folder:/{getline; print; exit}' "$file" | sed -e 's/^ *- *//' -e 's/^ *//;s/ *$//')
+  echo "Found folder $folder"
+
+  # Extract the tags from the file
+  tags=$(awk '/tags:/{getline; while ($0 ~ /^ *- /) {print; getline}}' "$file" | sed -e 's/^ *- *//' -e 's/^ *//;s/ *$//')
+
+  # Process the folder
+  if [ ! -z "$folder" ] && [ "$folder" != "none" ]; then
+    TARGET_DIR="$VAULT_DIR/$DEST_DIR/$folder"
+    mkdir -p "$TARGET_DIR"
+    mv "$file" "$TARGET_DIR/"
+    echo "Moved $file to $TARGET_DIR"
+  else
+    echo "No valid folder found for $file"
+  fi
+
+  # Process the tags
+  if [ ! -z "$tags" ]; then
+    echo "Found tags:"
+    echo "$tags" | while read -r tag; do
+      if [ "$tag" != "none" ]; then
+        echo "Found tag $tag"
+        TAG_FILE="$TAGS_DIR/$tag.md"
+        touch "$TAG_FILE"
+      else
+        echo "Skipping tag 'none'"
+      fi
+    done
+
+    # Append tags at the bottom of the file if none of them are "none"
+    valid_tags=$(echo "$tags" | grep -v '^none$')
+    if [ ! -z "$valid_tags" ]; then
+      echo -e "\n---\n\nTags: $(echo "$valid_tags" | sed -e 's/^/[[/;s/$/]]/' | tr '\n' ' ' | sed 's/ *$//')" >> "$TARGET_DIR/$(basename "$file")"
+      echo "Appended tags to $TARGET_DIR/$(basename "$file")"
+    fi
+  else
+    echo "No tags found for $file"
+  fi
+
+done
+
+echo "Done 🪷"

@@ -1,0 +1,14 @@
+#!/bin/zsh
+
+# Ensure that tmux is running
+tmux start-server 2>/dev/null
+
+# Check if a tmux session named "notes" exists
+if tmux has-session -t notes 2>/dev/null; then
+    # If the session exists, attach to it
+    tmux attach-session -t notes
+else
+    # If the session doesn't exist, change to the notes directory and create one
+    cd ~/desktop/studies/zettelkasten
+    tmux new-session -s notes
+fi

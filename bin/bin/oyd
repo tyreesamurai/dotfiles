@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# oyd — open yesterday's Daily Note
+
+set -euo pipefail
+
+ROOT="$HOME/Desktop/studies/zettelkasten"
+TEMPLATE="$ROOT/templates/daily.md"
+
+# yesterday's date (portable across BSD/GNU date)
+if date -v-1d +%Y-%m-%d >/dev/null 2>&1; then
+  # macOS / BSD date
+  TITLE="$(date -v-1d +%Y-%m-%d)"
+else
+  # GNU date (Linux)
+  TITLE="$(date -d 'yesterday' +%Y-%m-%d)"
+fi
+
+DAILY_DIR="$ROOT/inbox"
+FILE="$DAILY_DIR/${TITLE}.md"
+
+cd "$ROOT" || exit 1
+
+mkdir -p "$DAILY_DIR"
+[[ -f "$FILE" ]] || : > "$FILE"
+
+NVIM_NOTE_TITLE="$TITLE" \
+NVIM_NOTE_TEMPLATE="$TEMPLATE" \
+nvim "$FILE" +'lua require("user.on_note").new_daily()'

@@ -79,7 +79,7 @@ ENV PATH="/root/.local/bin:${PATH}"
 
 # ---------- Zsh & dotfiles ----------
 ARG DOTFILES_REPO="https://github.com/tyreesamurai/dotfiles.git"
-ARG DOTFILES_BRANCH="main"
+ARG DOTFILES_BRANCH="work"
 
 RUN git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh /root/.config/oh-my-zsh \
   && git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions /root/.config/oh-my-zsh/custom/plugins/zsh-autosuggestions \

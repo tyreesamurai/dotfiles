@@ -13,8 +13,12 @@ FILE="$ROOT/inbox/${SLUG}.md"
 
 cd "$ROOT" || exit 1
 
-mkdir -p "$ROOT/inbox"
-: >"$FILE"
+if [ -f "$FILE" ]; then
+  nvim "$FILE"
+else
+  mkdir -p "$ROOT/inbox"
+  : >"$FILE"
 
-# Pass the pretty title to nvim and expand the snippet on open
-NVIM_NOTE_TITLE="$TITLE" nvim "$FILE" +'lua require("user.on_note").new_note()'
+  # Pass the pretty title to nvim and expand the snippet on open
+  NVIM_NOTE_TITLE="$TITLE" nvim "$FILE" +'lua require("user.on_note").new_note()'
+fi

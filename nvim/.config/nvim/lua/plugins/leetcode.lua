@@ -8,6 +8,6 @@ return {
   },
 
   opts = {
-    lang = "typescript",
+    lang = "golang",
   },
 }

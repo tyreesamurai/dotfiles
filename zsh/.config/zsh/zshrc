@@ -1,6 +1,7 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 export ZSH="$HOME/.config/oh-my-zsh"
 export ZSH_CUSTOM="${ZSH_CUSTOM:-$ZSH/custom}"
+export BUN_INSTALL="$HOME/.bun"
 
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting web-search)
 source $ZSH/oh-my-zsh.sh
@@ -15,13 +16,16 @@ alias tryhackme="docker run --name try-hack-me -it --rm \
   try-hack-me:latest"
 
 alias vim="nvim"
+alias python="python3"
 alias ls="eza --icons --group-directories-first"
 alias ll="eza --icons -l --group-directories-first"
 
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
 export PATH="$HOME/bin:$PATH"
 export PATH="/opt/homebrew/bin:$PATH"
+export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
 export PNPM_HOME="/Users/tyreesamurai/Library/pnpm"
 export PATH="$PNPM_HOME:$PATH"
 

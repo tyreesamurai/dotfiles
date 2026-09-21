@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-dnf install -y \
+sudo dnf install -y \
   git neovim tmux zsh stow \
   curl wget unzip tar gzip \
   fzf fd-find ripgrep \
@@ -19,6 +19,8 @@ mkdir -p \
 
 command -v zoxide >/dev/null || sudo dnf install -y zoxide
 command -v eza >/dev/null || cargo install eza
+
+curl -fsSL https://bun.com/install | bash
 
 export ZSH="$HOME/.config/oh-my-zsh"
 RUNZSH=no CHSH=no KEEP_ZSHRC=yes \
@@ -38,3 +40,11 @@ export TMUX_PLUGIN_MANAGER_PATH="$HOME"/.config/tmux/plugins
 tmux -f "$HOME"/.config/tmux/tmux.conf start-server
 "$HOME"/.config/tmux/plugins/tpm/bin/install_plugins
 tmux kill-server
+
+cat >~/.zshenv <<'EOF'
+export ZDOTDIR="$HOME/.config/zsh"
+EOF
+
+sudo chsh -s /usr/bin/zsh "$USER"
+
+exec zsh

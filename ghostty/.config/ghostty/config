@@ -1,7 +1,11 @@
-background-opacity = 0.8
-background-blur-radius = 20
+background-opacity = 0.80
+background-blur-radius = 50
 window-theme = ghostty
 theme = Gruvbox Dark
 
 font-family = "Mononoki Nerd Font"
 font-size = 16
+
+mouse-hide-while-typing = true
+
+shell-integration-features = no-cursor,sudo,title

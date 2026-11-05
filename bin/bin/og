@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 # Directory containing markdown files
-VAULT_DIR="$HOME/desktop/studies/zettelkasten"
+VAULT_DIR="$HOME/desktop/work/zettelkasten"
 SOURCE_DIR="zettelkasten"
 DEST_DIR="notes"
 TAGS_DIR="$VAULT_DIR/tags"

@@ -8,7 +8,7 @@ fi
 
 TITLE="$*"
 SLUG="$(echo "$TITLE" | tr ' ' '-')"
-ROOT="$HOME/desktop/studies/zettelkasten"
+ROOT="$HOME/desktop/work/zettelkasten"
 FILE="$ROOT/inbox/${SLUG}.md"
 
 cd "$ROOT" || exit 1

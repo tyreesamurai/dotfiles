@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-ROOT="$HOME/Desktop/studies/zettelkasten"
+ROOT="$HOME/Desktop/work/zettelkasten"
 TEMPLATE="$ROOT/templates/daily.md"
 
 # yesterday's date (portable across BSD/GNU date)
@@ -21,8 +21,8 @@ FILE="$DAILY_DIR/${TITLE}.md"
 cd "$ROOT" || exit 1
 
 mkdir -p "$DAILY_DIR"
-[[ -f "$FILE" ]] || : > "$FILE"
+[[ -f "$FILE" ]] || : >"$FILE"
 
 NVIM_NOTE_TITLE="$TITLE" \
-NVIM_NOTE_TEMPLATE="$TEMPLATE" \
-nvim "$FILE" +'lua require("user.on_note").new_daily()'
+  NVIM_NOTE_TEMPLATE="$TEMPLATE" \
+  nvim "$FILE" +'lua require("user.on_note").new_daily()'

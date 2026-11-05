@@ -1,33 +1,17 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 export ZSH="$HOME/.config/oh-my-zsh"
 export ZSH_CUSTOM="${ZSH_CUSTOM:-$ZSH/custom}"
-export BUN_INSTALL="$HOME/.bun"
 
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting web-search jsontools)
 source $ZSH/oh-my-zsh.sh
 
 eval "$(oh-my-posh init zsh --config $HOME/.config/oh-my-posh/themes/spaceship.omp.json)"
 
-alias tryhackme="docker run --name try-hack-me -it --rm \
-  --hostname dev \
-  --cap-add=NET_ADMIN \
-  --device /dev/net/tun \
-  -v ~/Desktop/studies/personal/pentesting/openvpn:/temp/openvpn \
-  try-hack-me:latest"
-
 alias vi="nvim"
 alias vim="nvim"
-alias python="python3"
-alias ls="eza --icons --group-directories-first"
-alias ll="eza --icons -l --group-directories-first"
 
 export MANPAGER="nvim +Man\!"
-export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
 export PATH="$HOME/bin:$PATH"
 export PATH="/opt/homebrew/bin:$PATH"
-export PATH="$BUN_INSTALL/bin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
-export PATH="$PNPM_HOME:$PATH"
 
 eval "$(zoxide init --cmd cd zsh)"

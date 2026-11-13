@@ -20,6 +20,7 @@ alias vim="nvim"
 alias python="python3"
 alias ls="eza --icons --group-directories-first"
 alias ll="eza --icons -l --group-directories-first"
+alias docker="podman"
 
 export MANPAGER="nvim +Man\!"
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"

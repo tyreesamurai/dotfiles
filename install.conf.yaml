@@ -16,10 +16,6 @@
     ~/.config/zsh/:
       glob: true
       path: zsh/*.zsh
-
 # uncomment these lines if you have any directories you'd want created on init
 # - create:
 #   - ~/path/to/file
-
-- shell:
-    - [git submodule udpate --init --recursive, Installing submodules]

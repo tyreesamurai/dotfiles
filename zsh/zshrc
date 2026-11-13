@@ -1,0 +1,63 @@
+# ~/.config/zsh/.zshrc
+
+# ---- Environment -------------------------------------------------------------
+typeset -U path PATH fpath   # no duplicate entries
+path=("$HOME/.local/bin" "$HOME/.local/opt" "$HOME/bin" $path)
+
+export EDITOR=nvim
+export VISUAL=nvim
+export MANPAGER='nvim +Man!'
+export BAT_THEME='ansi'
+export ZSH_CACHE_DIR="$XDG_CACHE_HOME/zsh"
+
+export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:200 {}'"
+export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --color=always {}'"
+
+# ---- History & options -------------------------------------------------------
+mkdir -p "$XDG_STATE_HOME/zsh" "$ZSH_CACHE_DIR/completions"
+HISTFILE="$XDG_STATE_HOME/zsh/history"
+HISTSIZE=50000
+SAVEHIST=50000
+
+setopt share_history hist_ignore_dups hist_ignore_space auto_cd
+bindkey -e
+
+# ---- Completion --------------------------------------------------------------
+fpath=("$ZSH_CACHE_DIR/completions" $fpath)
+[[ -n "$HOMEBREW_PREFIX" ]] && fpath=("$HOMEBREW_PREFIX/share/zsh/site-functions" $fpath)
+
+# Generate each tool's completion once; run `refresh-completions` to rebuild
+for _tool in kubectl helm flux; do
+  if (( $+commands[$_tool] )) && [[ ! -s "$ZSH_CACHE_DIR/completions/_$_tool" ]]; then
+    "$_tool" completion zsh >| "$ZSH_CACHE_DIR/completions/_$_tool" 2>/dev/null
+  fi
+done
+unset _tool
+
+autoload -Uz compinit && compinit -d "$ZSH_CACHE_DIR/zcompdump"
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+
+# ---- Aliases, functions, OS-specific -----------------------------------------
+for _file in aliases.zsh functions.zsh os.zsh local.zsh; do
+  [[ -r "$ZDOTDIR/$_file" ]] && source "$ZDOTDIR/$_file"
+done
+unset _file
+# os.zsh:    only exists on the linux/macos branches
+# local.zsh: per-machine, never committed
+
+# ---- Tool integrations -------------------------------------------------------
+(( $+commands[fzf] ))      && source <(fzf --zsh)
+(( $+commands[zoxide] ))   && eval "$(zoxide init --cmd cd zsh)"
+(( $+commands[starship] )) && eval "$(starship init zsh)"
+
+# ---- Plugins (syntax highlighting must be last) ------------------------------
+for _plugin in zsh-autosuggestions zsh-syntax-highlighting; do
+  for _dir in /usr/share /opt/homebrew/share /usr/local/share; do
+    if [[ -r "$_dir/$_plugin/$_plugin.zsh" ]]; then
+      source "$_dir/$_plugin/$_plugin.zsh"
+      break
+    fi
+  done
+done
+unset _plugin _dir

@@ -1,0 +1,114 @@
+# site.yml : sets up a Fedora machine with my packages and dotfiles.
+#
+# Run on the machine itself (container, home server); ansible-pull clones
+# this repo to ~/.dotfiles and then runs this playbook from it:
+#
+#   ansible-pull -U https://github.com/tyreesamurai/dotfiles.git -C linux \
+#     -d ~/.dotfiles ansible/site.yml -K
+#
+# (-K asks for your sudo password; leave it off where sudo needs none)
+
+- name: Bootstrap a Fedora machine
+  hosts: localhost
+  connection: local
+
+  vars:
+    # ansible-pull already cloned the repo; this file lives in <repo>/ansible
+    dotfiles_dir: "{{ playbook_dir | dirname }}"
+
+    packages:
+      - zsh
+      - zsh-autosuggestions
+      - zsh-syntax-highlighting
+      - neovim
+      - git
+      - fzf
+      - zoxide
+      - eza
+      - bat
+      - fd-find
+      - ripgrep
+      - tar # needed to unpack the downloads below
+
+    # Tools that aren't in Fedora's repos come straight from their GitHub
+    # releases. To upgrade, bump the version and re-run the playbook.
+    lazygit_version: "0.66.3"
+    starship_version: "1.27.0"
+
+    home: "{{ ansible_facts['env']['HOME'] }}"
+    opt_dir: "{{ home }}/.local/opt" # each version unpacks into its own folder here
+    bin_dir: "{{ home }}/.local/bin" # on PATH (see zshrc); holds a link to the active version
+    arch: "{{ ansible_facts['architecture'] }}" # x86_64 or aarch64
+
+    cli_tools:
+      - name: lazygit
+        version: "{{ lazygit_version }}"
+        url: >-
+          https://github.com/jesseduffield/lazygit/releases/download/v{{ lazygit_version }}/lazygit_{{ lazygit_version }}_linux_{{ 'arm64' if arch == 'aarch64' else 'x86_64' }}.tar.gz
+      - name: starship
+        version: "{{ starship_version }}"
+        url: >-
+          https://github.com/starship/starship/releases/download/v{{ starship_version }}/starship-{{ arch }}-unknown-linux-musl.tar.gz
+
+  tasks:
+    - name: Install packages
+      become: true # run this task as root (sudo)
+      ansible.builtin.package:
+        name: "{{ packages }}"
+        state: present
+
+    - name: Make folders for downloaded tools
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ bin_dir }}"
+        - "{{ opt_dir }}"
+      tags: tools
+
+    - name: Make a folder for each tool version
+      ansible.builtin.file:
+        path: "{{ opt_dir }}/{{ item.name }}-{{ item.version }}"
+        state: directory
+        mode: "0755"
+      loop: "{{ cli_tools }}"
+      loop_control:
+        label: "{{ item.name }} {{ item.version }}" # keeps the output short
+      tags: tools
+
+    - name: Download and unpack each tool
+      ansible.builtin.unarchive:
+        src: "{{ item.url }}"
+        dest: "{{ opt_dir }}/{{ item.name }}-{{ item.version }}"
+        remote_src: true # download on the machine itself
+        creates: "{{ opt_dir }}/{{ item.name }}-{{ item.version }}/{{ item.name }}" # skip if already there
+      loop: "{{ cli_tools }}"
+      loop_control:
+        label: "{{ item.name }} {{ item.version }}"
+      tags: tools
+
+    - name: Link each tool into ~/.local/bin
+      ansible.builtin.file:
+        src: "{{ opt_dir }}/{{ item.name }}-{{ item.version }}/{{ item.name }}"
+        dest: "{{ bin_dir }}/{{ item.name }}"
+        state: link
+      loop: "{{ cli_tools }}"
+      loop_control:
+        label: "{{ item.name }} {{ item.version }}"
+      tags: tools
+
+    # ./install downloads Dotbot into the (gitignored) dotbot/ folder the
+    # first time, then reuses it on later runs
+    - name: Link dotfiles with Dotbot
+      ansible.builtin.command: ./install
+      args:
+        chdir: "{{ dotfiles_dir }}"
+      register: dotbot
+      changed_when: "'Creating symlink' in dotbot.stdout"
+
+    - name: Make zsh the login shell
+      become: true
+      ansible.builtin.user:
+        name: "{{ ansible_facts['user_id'] }}"
+        shell: /usr/bin/zsh

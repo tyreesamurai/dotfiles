@@ -1,0 +1,24 @@
+- defaults:
+    link:
+      create: true
+      relink: true
+
+- clean: ["~"]
+
+- link:
+    ~/.config/tmux: tmux
+    ~/.config/nvim: nvim
+    ~/.config/starship/: starship
+    ~/.config/ghostty: ghostty
+    ~/.zshenv: zsh/zshenv
+    ~/.config/zsh/.zshrc: zsh/zshrc
+    ~/.config/zsh/:
+      glob: true
+      path: zsh/*.zsh
+
+# uncomment these lines if you have any directories you'd want created on init
+# - create:
+#   - ~/path/to/file
+
+- shell:
+    - [git submodule udpate --init --recursive, Installing submodules]

@@ -1,0 +1,34 @@
+[init]
+  defaultBranch = main
+
+[core]
+  editor = nvim
+
+[pull]
+  ff = only
+
+[push]
+  default = simple
+  autoSetupRemote = true
+
+[fetch]
+  prune = true
+
+[rebase]
+  autoStash = true
+
+[merge]
+  conflictstyle = zdiff3
+
+[diff]
+  algorithm = histogram
+  colorMoved = default
+
+[rerere]
+  enabled = true
+
+[help]
+  autocorrect = prompt
+
+[include]
+  path = config.local

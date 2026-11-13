@@ -1,0 +1,31 @@
+add_newline = false
+
+format = """
+$username\
+$directory\
+$git_branch\
+$git_status\
+$kubernetes\
+$terraform\
+$cmd_duration\
+$line_break\
+$character"""
+
+[kubernetes]
+disabled = false
+symbol = "\U000F10FE "
+format = 'via [$symbol$context]($style)'
+style = 'bold cyan'
+
+[[kubernetes.contexts]]
+context_pattern = '.*prod.*'
+style = 'bold red'
+
+[[kubernetes.contexts]]
+context_pattern = '.*staging.*'
+style = 'bold yellow'
+
+[terraform]
+symbol = "\U000F1062 "
+format = 'via [$symbol$workspace]($style)'
+style = 'bold 105'

@@ -32,6 +32,7 @@
 
     # Tools that aren't in Fedora's repos come straight from their GitHub
     # releases. To upgrade, bump the version and re-run the playbook.
+    dotbot_version: v1.24.0
     lazygit_version: "0.66.3"
     starship_version: "1.27.0"
 
@@ -98,14 +99,30 @@
         label: "{{ item.name }} {{ item.version }}"
       tags: tools
 
-    # ./install downloads Dotbot into the (gitignored) dotbot/ folder the
-    # first time, then reuses it on later runs
+    # Dotbot isn't tracked in the repo. Clone it into <repo>/dotbot, hide it
+    # from git on this machine only, then run it against install.conf.yaml.
+    - name: Download Dotbot into the dotfiles folder
+      ansible.builtin.git:
+        repo: https://github.com/anishathalye/dotbot.git
+        dest: "{{ dotfiles_dir }}/dotbot"
+        version: "{{ dotbot_version }}"
+        recursive: true # pulls in Dotbot's own PyYAML submodule
+      tags: dotfiles
+
+    - name: Keep git from seeing the dotbot folder
+      ansible.builtin.lineinfile:
+        path: "{{ dotfiles_dir }}/.git/info/exclude" # like .gitignore, but local and never committed
+        line: /dotbot/
+      tags: dotfiles
+
     - name: Link dotfiles with Dotbot
-      ansible.builtin.command: bash ./install
+      ansible.builtin.command: >-
+        python3 dotbot/bin/dotbot -d . -c install.conf.yaml
       args:
         chdir: "{{ dotfiles_dir }}"
       register: dotbot
       changed_when: "'Creating symlink' in dotbot.stdout"
+      tags: dotfiles
 
     - name: Make zsh the login shell
       become: true

@@ -29,6 +29,18 @@
       - fd-find
       - ripgrep
       - tar # needed to unpack the downloads below
+      # Neovim / LazyVim build tools: Treesitter compiles parsers, Mason
+      # downloads and builds language servers and formatters
+      - tree-sitter-cli
+      - gcc
+      - gcc-c++
+      - make
+      - unzip
+      - curl
+      - nodejs # Mason: pyright, vtsls, prettier, ...
+      - npm
+      - golang # Mason: gopls, goimports, ...
+      - python3-pip # Mason: Python-based tools
 
     # Tools that aren't in Fedora's repos come straight from their GitHub
     # releases. To upgrade, bump the version and re-run the playbook.
@@ -122,7 +134,28 @@
         chdir: "{{ dotfiles_dir }}"
       register: dotbot
       changed_when: "'Creating symlink' in dotbot.stdout"
+      # Dotbot exits 1 for any problem. Only stop for broken links or a broken
+      # config; a failed `- shell:` step just gets a warning below.
+      failed_when: >-
+        dotbot.rc != 0 and (
+          'links were not successfully set up' in dotbot.stdout or
+          'commands were not successfully executed' not in dotbot.stdout
+        )
       tags: dotfiles
+
+    - name: Warn if a Dotbot shell command failed
+      ansible.builtin.debug:
+        msg: "{{ dotbot.stdout_lines | select('search', 'failed') | list }}"
+      when: "'commands were not successfully executed' in dotbot.stdout"
+      tags: dotfiles
+
+    # Installs every plugin at the exact version in nvim/lazy-lock.json, so a
+    # fresh machine matches your others. Mason tools and Treesitter parsers
+    # still install the first time you open nvim.
+    - name: Install Neovim plugins from lazy-lock.json
+      ansible.builtin.command: nvim --headless "+Lazy! restore" +qa
+      changed_when: false # lazy.nvim doesn't report what it changed
+      tags: nvim
 
     - name: Make zsh the login shell
       become: true

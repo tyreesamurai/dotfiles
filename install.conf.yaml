@@ -8,10 +8,11 @@
 - link:
     ~/.config/tmux: tmux
     ~/.config/nvim: nvim
-    ~/.config/starship/: starship
+    ~/.config/starship: starship
     ~/.config/ghostty: ghostty
     ~/.zshenv: zsh/zshenv
     ~/.config/zsh/.zshrc: zsh/zshrc
+    ~/.config/zsh/.zprofile: zsh/zprofile
     ~/.config/zsh/:
       glob: true
       path: zsh/*.zsh

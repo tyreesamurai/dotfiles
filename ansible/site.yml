@@ -101,7 +101,7 @@
     # ./install downloads Dotbot into the (gitignored) dotbot/ folder the
     # first time, then reuses it on later runs
     - name: Link dotfiles with Dotbot
-      ansible.builtin.command: ./install
+      ansible.builtin.command: bash ./install
       args:
         chdir: "{{ dotfiles_dir }}"
       register: dotbot

@@ -14,7 +14,7 @@ $character"""
 [kubernetes]
 disabled = false
 symbol = "\U000F10FE "
-format = 'via [$symbol$context]($style)'
+format = 'via [$symbol$context]($style) '
 style = 'bold cyan'
 
 [[kubernetes.contexts]]

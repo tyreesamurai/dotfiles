@@ -21,21 +21,27 @@ tool expects them, using one mapping file.
 ├── README.md
 ├── INVENTORY.md          # every required tool + brew/apt/dnf package names
 ├── Dockerfile            # Fedora test image (base + final stages)
-├── install               # runs Dotbot; downloads it into dotbot/ on first run
 ├── install.conf.yaml     # Dotbot mapping: where each file gets linked
-├── .gitignore            # ignores dotbot/
+├── .gitignore            # ignores files tools generate inside the repo (tmux/plugins/)
 ├── ansible/
 │   └── site.yml          # Fedora bootstrap playbook (run with ansible-pull)
-└── zsh/
-    ├── zshenv            # -> ~/.zshenv
-    ├── zshrc             # -> ~/.config/zsh/.zshrc
-    ├── aliases.zsh       # -> ~/.config/zsh/aliases.zsh
-    ├── functions.zsh     # -> ~/.config/zsh/functions.zsh
-    └── os.zsh            # linux / macos branches only
+├── zsh/
+│   ├── zshenv            # -> ~/.zshenv
+│   ├── zshrc             # -> ~/.config/zsh/.zshrc
+│   ├── aliases.zsh       # -> ~/.config/zsh/aliases.zsh
+│   ├── functions.zsh     # -> ~/.config/zsh/functions.zsh
+│   └── os.zsh            # linux / macos branches only
+├── nvim/                 # -> ~/.config/nvim (LazyVim)
+├── tmux/
+│   └── tmux.conf         # -> ~/.config/tmux/tmux.conf
+├── git/
+│   ├── config            # -> ~/.config/git/config
+│   └── ignore            # -> ~/.config/git/ignore (global gitignore)
+└── bin/                  # each script -> ~/.local/bin/<name>
 ```
 
-Other tools (`nvim/`, `ghostty/`, `starship/`, `tmux/`, ...) get their own
-top-level folder the same way.
+Other tools (`ghostty/`, `starship/`, ...) get their own top-level folder the
+same way.
 
 ## Branches
 
@@ -54,9 +60,20 @@ Workflow:
    `aliases.zsh` / `functions.zsh` on a branch, or merges from `main` will
    conflict.
 
-Machine-specific settings (work VM, a single laptop) go in
-`~/.config/zsh/local.zsh` on that machine. It's loaded if present and is never
-committed.
+## Machine-specific settings
+
+Anything that only applies to one machine (the work VM, a single laptop) lives
+on that machine and is never committed. Each one is loaded only if it exists.
+
+| File                         | Loaded by                                 | Typical use                      |
+| ---------------------------- | ----------------------------------------- | -------------------------------- |
+| `~/.config/zsh/local.zsh`    | `zshrc`                                   | Work-only aliases, proxies, PATH |
+| `~/.config/git/config.local` | `[include]` at the bottom of `git/config` | Work email, credential helpers   |
+
+Tools that run `git config --global` (for example `gh auth setup-git`) write
+into `git/config` here, because it's a link into this repo. Check `git diff`
+after setting up a new tool, and move anything machine-specific into
+`config.local`.
 
 ## How linking works
 
@@ -66,7 +83,9 @@ committed.
 - defaults:
     link:
       create: true # make parent folders like ~/.config
-      relink: true
+      relink: true # replace existing symlinks (including old Stow ones)
+
+- clean: ["~", "~/.config", "~/.local/bin"] # remove dead links into this repo
 
 - link:
     ~/.zshenv: zsh/zshenv
@@ -74,19 +93,50 @@ committed.
     ~/.config/zsh/:
       glob: true
       path: zsh/*.zsh
+    ~/.config/nvim: nvim
+    ~/.config/tmux/tmux.conf: tmux/tmux.conf
+    ~/.config/git/:
+      glob: true
+      path: git/*
+    ~/.local/bin/:
+      glob: true
+      path: bin/*
 ```
 
-Run `./install` to create the links. Dotbot isn't stored in this repo (no
-submodule): the first run clones it into `dotbot/`, which is gitignored, and
-later runs reuse it. The only requirements are `git` and `python3`. Re-run
-`./install` after adding a new file or mapping. Links point into this repo, so
-editing `~/.config/zsh/aliases.zsh` edits the file here.
+Dotbot is installed as a normal command, not stored in this repo. Run it from
+the repo root:
 
-To pass a different config (for example on the work VM):
-`./install install-work.conf.yaml`.
+```bash
+dotbot -c install.conf.yaml
+```
 
-To upgrade Dotbot: change `DOTBOT_VERSION` in `install`, delete `dotbot/`, run
-`./install`.
+Or from anywhere: `dotbot -d ~/.dotfiles -c ~/.dotfiles/install.conf.yaml`.
+
+Re-run it after adding a new file or mapping; it's safe to run as often as you
+like. Links point into this repo, so editing `~/.config/zsh/aliases.zsh` edits
+the file here.
+
+To use a different mapping (for example on the work VM):
+`dotbot -c install-work.conf.yaml`.
+
+Rules that keep the links sane:
+
+- **Link files, not folders that tools write into.** `~/.config/tmux` is a real
+  folder with only `tmux.conf` linked, so TPM's plugins land in
+  `~/.config/tmux/plugins/` and not in this repo. `nvim/` is linked as a whole
+  folder on purpose: everything Neovim writes goes to `~/.local/share/nvim`.
+- **Use `glob` for shared folders.** `~/.local/bin` and `~/.config/git` also
+  hold files that aren't mine (`claude`, `config.local`). Globbing links each
+  repo file individually and leaves the rest alone.
+- **Don't use `force: true`.** It deletes whatever real file or folder is at
+  the target. If Dotbot reports that a target exists, move it aside and re-run.
+
+To install or upgrade Dotbot itself:
+
+| OS    | Install                                             | Upgrade               |
+| ----- | --------------------------------------------------- | --------------------- |
+| macOS | `brew install dotbot`                               | `brew upgrade dotbot` |
+| Linux | `pipx install dotbot` (or `uv tool install dotbot`) | `pipx upgrade dotbot` |
 
 ## Zsh
 
@@ -104,6 +154,31 @@ To upgrade Dotbot: change `DOTBOT_VERSION` in `install`, delete `dotbot/`, run
 History is kept in `~/.local/state/zsh/history`, and caches (completions,
 `zcompdump`) in `~/.cache/zsh/`.
 
+## Neovim
+
+LazyVim, trimmed to what I actually use. Every file in `nvim/lua/plugins/`
+starts with a `-- why:` comment, and anything without a reason gets removed.
+
+- `lazy-lock.json` is committed, so every machine gets the same plugin versions.
+  Run `:Lazy restore` after pulling to match it.
+- Treesitter parsers are compiled on each machine, which needs the
+  `tree-sitter` CLI and a C compiler (see [INVENTORY.md](INVENTORY.md)). If
+  highlighting breaks or the `:` cmdline flickers with query errors, run
+  `:checkhealth nvim-treesitter`, then `:TSUpdate`.
+- To try a config change without touching the real one, put a copy in
+  `~/.config/nvim-test` and run `NVIM_APPNAME=nvim-test nvim`. It gets its own
+  plugins and data.
+
+## Tmux
+
+- [TPM](https://github.com/tmux-plugins/tpm) installs itself and the plugins
+  on the first tmux start, into `~/.config/tmux/plugins/` (ignored, not in
+  this repo). After changing the plugin list: `prefix + I` to install,
+  `prefix + Alt+u` to remove dropped plugins.
+- The Catppuccin theme is pinned to a release tag in `tmux.conf`. To upgrade:
+  change the tag, delete `~/.config/tmux/plugins/tmux`, then `prefix + I`.
+- `prefix + r` reloads the config.
+
 ## Bootstrapping a machine
 
 ### Fedora (home server, Linux desktops)
@@ -119,11 +194,12 @@ ansible-pull -U https://github.com/tyreesamurai/dotfiles.git -C linux \
 
 `-K` asks for your sudo password. The playbook:
 
-1. Installs packages with dnf.
-2. Downloads starship and lazygit from their GitHub releases into
+1. Installs packages with dnf, including `pipx`.
+2. Installs Dotbot with pipx.
+3. Downloads starship and lazygit from their GitHub releases into
    `~/.local/opt/<tool>-<version>/` and links them into `~/.local/bin`.
-3. Runs `./install` to link the dotfiles.
-4. Sets zsh as the login shell.
+4. Runs `dotbot -c install.conf.yaml` to link the dotfiles.
+5. Sets zsh as the login shell.
 
 It's safe to re-run: a second run should end with `changed=0`. Re-running is
 also how you update a machine after pushing changes.
@@ -141,15 +217,23 @@ For now:
 ```bash
 xcode-select --install          # compiler, git, python3
 # install Homebrew from https://brew.sh, then the brew column of INVENTORY.md
+brew install dotbot
 git clone -b macos https://github.com/tyreesamurai/dotfiles.git ~/.dotfiles
-~/.dotfiles/install
+cd ~/.dotfiles && dotbot -c install.conf.yaml
 ```
 
 ### Ubuntu
 
 The playbook is Fedora-only. Install the apt / bin column of
 [INVENTORY.md](INVENTORY.md) (note the [name gotchas](INVENTORY.md#name-gotchas)),
-then clone the `linux` branch and run `./install`.
+then:
+
+```bash
+sudo apt install -y pipx && pipx ensurepath
+pipx install dotbot
+git clone -b linux https://github.com/tyreesamurai/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles && dotbot -c install.conf.yaml
+```
 
 ## Testing in a container
 
@@ -192,3 +276,25 @@ Podman works too: swap `docker` for `podman` in the commands above.
 Once in the shell, the check script at the bottom of
 [INVENTORY.md](INVENTORY.md#check-whats-installed) shows what's installed and
 what's missing.
+
+## Troubleshooting
+
+**A whole folder got linked instead of one file** (for example tool data
+showing up in this repo). Replace the folder link with a real folder, then
+re-run Dotbot:
+
+```bash
+ls -ld ~/.config/tmux      # shows "-> .../dotfiles/tmux" if it's a folder link
+rm ~/.config/tmux          # no trailing slash, no -rf: removes only the link
+mkdir -p ~/.config/tmux
+dotbot -c install.conf.yaml
+```
+
+`rm -rf ~/.config/tmux/` with a trailing slash would follow the link and
+delete the files in this repo.
+
+**Dotbot says a target already exists.** A real file or folder is in the way.
+Move it aside (`mv ~/.config/foo ~/.config/foo.old`) and re-run.
+
+**Check where every git setting comes from:**
+`git config --list --show-origin --global`.

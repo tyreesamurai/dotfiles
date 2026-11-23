@@ -3,19 +3,20 @@
       create: true
       relink: true
 
-- clean: ["~"]
+- clean: ["~", "~/.config", "~/.local/bin"]
 
 - link:
-    ~/.config/tmux: tmux
+    ~/.config/tmux/tmux.conf: tmux/tmux.conf
     ~/.config/nvim: nvim
     ~/.config/starship: starship
     ~/.config/ghostty: ghostty
+    ~/.config/git: git
+    ~/.local/bin:
+      glob: true
+      path: bin/*
     ~/.zshenv: zsh/zshenv
     ~/.config/zsh/.zshrc: zsh/zshrc
     ~/.config/zsh/.zprofile: zsh/zprofile
     ~/.config/zsh/:
       glob: true
       path: zsh/*.zsh
-# uncomment these lines if you have any directories you'd want created on init
-# - create:
-#   - ~/path/to/file

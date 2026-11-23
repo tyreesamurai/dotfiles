@@ -48,7 +48,7 @@ unset _file
 
 # ---- Tool integrations -------------------------------------------------------
 (( $+commands[fzf] ))      && source <(fzf --zsh)
-(( $+commands[zoxide] ))   && eval "$(zoxide init --cmd cd zsh)"
+# (( $+commands[zoxide] ))   && eval "$(zoxide init --cmd cd zsh)"
 (( $+commands[starship] )) && eval "$(starship init zsh)"
 
 # ---- Plugins (syntax highlighting must be last) ------------------------------
